@@ -9,6 +9,24 @@ SELECT count(*)
 FROM company_information 
 
 --2. https://datalemur.com/questions/sql-highest-grossing
+SELECT 
+  category, 
+  product, 
+  total_spend 
+FROM (
+  SELECT 
+    category, 
+    product, 
+    SUM(spend) AS total_spend,
+    RANK() OVER (
+      PARTITION BY category 
+      ORDER BY SUM(spend) DESC) AS ranking 
+  FROM product_spend
+  WHERE EXTRACT(YEAR FROM transaction_date) = 2022
+  GROUP BY category, product
+) AS ranked_spending
+WHERE ranking <= 2 
+ORDER BY category, ranking;
 
   
 --3. https://datalemur.com/questions/frequent-callers
@@ -108,30 +126,27 @@ WHERE primary_flag = "Y"
 
   
 --11. https://leetcode.com/problems/movie-rating/?envType=study-plan-v2&envId=top-sql-50
-  WITH cte
-AS (
-	SELECT a.name AS results
-	FROM Users AS a
-	JOIN MovieRating AS b ON a.user_id = b.user_id
-	GROUP BY a.name
-	ORDER BY count(*) DESC
-		,a.name limit 1
-	)
-	,cte2
-AS (
-	SELECT c.title AS results
-	FROM Movies AS c
-	JOIN MovieRating AS d ON c.movie_id = d.movie_id
-	WHERE extract(month FROM d.created_at) = 2
-		AND extract(year FROM d.created_at) = 2020
-	GROUP BY c.title
-	ORDER BY avg(rating) DESC
-		,c.title limit 1
-	)
-SELECT *
-FROM cte
+WITH cte AS (
+    SELECT a.name AS results
+    FROM Users AS a
+    JOIN MovieRating AS b ON a.user_id = b.user_id
+    GROUP BY a.name
+    ORDER BY COUNT(*) DESC, a.name
+    LIMIT 1
+),
+cte2 AS (
+    SELECT c.title AS results
+    FROM Movies AS c
+    JOIN MovieRating AS d ON c.movie_id = d.movie_id
+    WHERE EXTRACT(MONTH FROM d.created_at) = 2
+      AND EXTRACT(YEAR FROM d.created_at) = 2020
+    GROUP BY c.title
+    ORDER BY AVG(d.rating) DESC, c.title
+    LIMIT 1
+)
+SELECT * FROM cte
 UNION ALL
-SELECT *
+SELECT * FROM cte2;
 
   
 --12. https://leetcode.com/problems/friend-requests-ii-who-has-the-most-friends/?envType=study-plan-v2&envId=top-sql-50
