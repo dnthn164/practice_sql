@@ -113,3 +113,45 @@ SELECT * FROM SALES_DATASET_RFM_PRJ WHERE 1=0;
 ---------------------------------------------
 SELECT * FROM SALES_DATASET_RFM_PRJ 
 ---------------------------------------------
+--5/Hãy tìm outlier (nếu có) cho cột QUANTITYORDERED và hãy chọn cách xử lý cho bản ghi đó (2 cách) 
+
+--Cách 1:
+
+WITH twt_min_max_values as (
+SELECT Q1-1.5*IQR as min_value, Q3+1.5*IQR as max_value
+FROM (
+SELECT
+percentile_cont(0.25) WITHIN GROUP (ORDER BY quantityordered) as Q1,
+percentile_cont(0.75) WITHIN GROUP (ORDER BY quantityordered) as Q3,
+percentile_cont(0.75) WITHIN GROUP (ORDER BY quantityordered)  - percentile_cont(0.25) WITHIN GROUP (ORDER BY quantityordered)  as IQR
+FROM SALES_DATASET_RFM_PRJ ) as a )
+
+
+SELECT *
+FROM SALES_DATASET_RFM_PRJ
+where 		quantityordered < (select min_value from twt_min_max_values ) 
+		or  quantityordered > (select max_value from twt_min_max_values)
+		
+--Cách 2: sử dụng z-core = (users - avg)/ stddev (độ lệch chuẩn)
+
+WITH cte AS (
+    SELECT 
+        orderdate,
+        quantityordered,
+        (SELECT AVG(quantityordered) FROM SALES_DATASET_RFM_PRJ) AS avg_quantity,
+        (SELECT STDDEV(quantityordered) FROM SALES_DATASET_RFM_PRJ) AS stddev_quantity
+    FROM SALES_DATASET_RFM_PRJ
+),
+twt_outlier AS (
+    SELECT 
+        orderdate,
+        quantityordered,
+        (quantityordered - avg_quantity) / stddev_quantity AS z_score
+    FROM cte
+)
+SELECT *
+FROM twt_outlier;
+
+---DELETE 
+DELETE FROM SALES_DATASET_RFM_PRJ
+WHERE quantityordered IN (SELECT quantityordered FROM twt_outlier )
