@@ -149,6 +149,8 @@ Nữ: 541
 Nam: 504
 Tổng: 1045
 */
+
+
 -----------------------------------------------------------------------------------
 /*
 Thống kê top 5 sản phẩm có lợi nhuận cao nhất từng tháng (xếp hạng cho từng sản phẩm). 
@@ -241,7 +243,7 @@ GROUP BY
 ORDER BY 
     dates, product_category;
 --------------------------------------------------------------------------------------------------------------
-/*
+/* Tạo metric trước khi dựng dashboard
 Xây dựng view gồm các cột: 
     Month (bảng orders)
     Year (bảng orders)
@@ -255,7 +257,7 @@ Xây dựng view gồm các cột:
     Profit_to_cost_ratio: tổng lợi nhuận / tổng chi phí
 */
 
-CREATE OR REPLACE VIEW bigquery-public-data.thelook_ecommerce.project02.vw_ecommerce_analyst AS
+CREATE OR REPLACE VIEW `project02-427007.project02.vw_ecommerce_analyst` AS
 WITH orders_data AS (
     SELECT 
         FORMAT_TIMESTAMP('%Y-%m', o.created_at) AS month,
@@ -264,9 +266,9 @@ WITH orders_data AS (
         COUNT(o.order_id) AS order_count,
         SUM(i.sale_price) AS total_sales
     FROM 
-        bigquery-public-data.thelook_ecommerce.orders AS o
+        `bigquery-public-data.thelook_ecommerce.orders` AS o
     JOIN 
-        bigquery-public-data.thelook_ecommerce.order_items AS i 
+        `bigquery-public-data.thelook_ecommerce.order_items` AS i 
     ON 
         o.order_id = i.order_id
     WHERE 
@@ -280,7 +282,7 @@ product_data AS (
         p.category AS product_category,
         p.cost
     FROM 
-        bigquery-public-data.thelook_ecommerce.products AS p
+        `bigquery-public-data.thelook_ecommerce.products` AS p
 ),
 monthly_metrics AS (
     SELECT 
@@ -331,4 +333,13 @@ FROM
     growth_metrics
 ORDER BY 
     year, month, product_category;
+
+
+
+----------------------------------------------------------
+
+
+
+
+
 
