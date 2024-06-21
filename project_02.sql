@@ -240,6 +240,95 @@ GROUP BY
     dates, product_category
 ORDER BY 
     dates, product_category;
+--------------------------------------------------------------------------------------------------------------
+/*
+Xây dựng view gồm các cột: 
+    Month (bảng orders)
+    Year (bảng orders)
+    Product_category (bảng product)
+    TPV (bảng order_items)
+    TPO (bảng order_items)
+    Revenue_growth (doanh thu tháng sau - doanh thu tháng trước)/doanh thu tháng trước (hiển thị %)
+    Order_growth: (số đơn hàng tháng sau - số đơn hàng tháng trước/ số đơn tháng trước (hiển thị %)
+    Total_cost: bảng product
+    Total_profit: tổng doanh thu - tổng chi phí
+    Profit_to_cost_ratio: tổng lợi nhuận / tổng chi phí
+*/
 
+CREATE OR REPLACE VIEW bigquery-public-data.thelook_ecommerce.project02.vw_ecommerce_analyst AS
+WITH orders_data AS (
+    SELECT 
+        FORMAT_TIMESTAMP('%Y-%m', o.created_at) AS month,
+        EXTRACT(YEAR FROM o.created_at) AS year,
+        i.product_id,
+        COUNT(o.order_id) AS order_count,
+        SUM(i.sale_price) AS total_sales
+    FROM 
+        bigquery-public-data.thelook_ecommerce.orders AS o
+    JOIN 
+        bigquery-public-data.thelook_ecommerce.order_items AS i 
+    ON 
+        o.order_id = i.order_id
+    WHERE 
+        o.created_at BETWEEN TIMESTAMP('2019-01-01') AND TIMESTAMP('2022-04-30')
+    GROUP BY 
+        month, year, i.product_id
+),
+product_data AS (
+    SELECT 
+        p.id AS product_id,
+        p.category AS product_category,
+        p.cost
+    FROM 
+        bigquery-public-data.thelook_ecommerce.products AS p
+),
+monthly_metrics AS (
+    SELECT 
+        o.month,
+        o.year,
+        p.product_category,
+        SUM(o.total_sales) AS tpv, 
+        SUM(o.order_count) AS tpo, 
+        SUM(p.cost * o.order_count) AS total_cost, 
+        SUM(o.total_sales - (p.cost * o.order_count)) AS total_profit 
+    FROM 
+        orders_data AS o
+    JOIN 
+        product_data AS p
+    ON 
+        o.product_id = p.product_id
+    GROUP BY 
+        o.month, o.year, p.product_category
+),
+growth_metrics AS (
+    SELECT 
+        month,
+        year,
+        product_category,
+        tpv,
+        tpo,
+        total_cost,
+        total_profit,
+        total_profit / total_cost AS profit_to_cost_ratio,
+        (tpv - LAG(tpv) OVER (PARTITION BY product_category ORDER BY year, month)) / LAG(tpv) OVER (PARTITION BY product_category ORDER BY year, month) * 100 AS revenue_growth,
+        (tpo - LAG(tpo) OVER (PARTITION BY product_category ORDER BY year, month)) / LAG(tpo) OVER (PARTITION BY product_category ORDER BY year, month) * 100 AS order_growth
+    FROM 
+        monthly_metrics
+)
 
+SELECT 
+    month,
+    year,
+    product_category,
+    tpv,
+    tpo,
+    revenue_growth,
+    order_growth,
+    total_cost,
+    total_profit,
+    profit_to_cost_ratio
+FROM 
+    growth_metrics
+ORDER BY 
+    year, month, product_category;
 
