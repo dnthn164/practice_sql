@@ -400,6 +400,109 @@ Tăng trưởng theo tháng: Sự tăng trưởng doanh thu và số lượng đ
 Từ tháng 2 đến tháng 2: các sản phẩm Swims có sự gia tăng mạnh mẽ
 */
 
+WITH sales_convert AS (
+    SELECT 
+        CAST(month AS text) AS month,
+        CAST(year AS text) AS year, 
+        product_category,
+        CAST(REPLACE(tpv, ',', '') AS numeric) AS tpv,  
+        CAST(tpo AS int) AS tpo, 
+        CAST(REPLACE(total_cost, ',', '') AS numeric) AS total_cost,  
+        CAST(order_growth AS numeric) AS order_growth, 
+        CAST(REPLACE(total_profit, ',', '') AS numeric) AS total_profit,  
+        CAST(profit_to_cost_ratio AS numeric) AS profit_to_cost_ratio,
+        TO_DATE(year || '-' || LPAD(month, 2, '0') || '-01', 'YYYY-MM-DD') AS sales_date
+    FROM sales_dataset
+    WHERE revenue_growth IS NOT NULL 
+        AND order_growth IS NOT NULL 
+        AND tpv <> ''     
+        AND CAST(tpo AS int) > 0
+        AND total_cost <> ''
+        AND total_profit <> ''
+        AND profit_to_cost_ratio <> ''
+),
+sales_main AS (
+    SELECT 
+        month,
+        year,
+        product_category,
+        tpv,
+        tpo,
+        total_cost,
+        order_growth,
+        total_profit,
+        profit_to_cost_ratio,
+        sales_date,
+        ROW_NUMBER() OVER(PARTITION BY month, year, product_category ORDER BY month, year) AS rn
+    FROM sales_convert
+),
+first_purchase AS (
+    SELECT 
+        product_category,
+        tpo,
+        tpv,
+        total_profit,
+        sales_date,
+        (EXTRACT(YEAR FROM sales_date) * 12 + EXTRACT(MONTH FROM sales_date)) -
+        (EXTRACT(YEAR FROM cohort_date) * 12 + EXTRACT(MONTH FROM cohort_date)) + 1 AS index,
+        cohort_date
+    FROM (
+        SELECT 
+            product_category,
+            tpo,
+            tpv,
+            total_profit,
+            sales_date,
+            MIN(sales_date) OVER (PARTITION BY product_category) AS cohort_date
+        FROM sales_main
+    ) subquery
+),
+xxx AS (
+    SELECT 
+        cohort_date, 
+        index, 
+        COUNT(DISTINCT product_category) AS cnt, 
+        SUM(tpv) AS revenue
+    FROM first_purchase
+    GROUP BY cohort_date, index
+),
+customer_cohort AS (
+    SELECT 
+        cohort_date,
+        SUM(CASE WHEN index = 1 THEN cnt ELSE 0 END) AS m1,
+        SUM(CASE WHEN index = 2 THEN cnt ELSE 0 END) AS m2,
+        SUM(CASE WHEN index = 3 THEN cnt ELSE 0 END) AS m3,
+        SUM(CASE WHEN index = 4 THEN cnt ELSE 0 END) AS m4,
+        SUM(CASE WHEN index = 5 THEN cnt ELSE 0 END) AS m5,
+        SUM(CASE WHEN index = 6 THEN cnt ELSE 0 END) AS m6,
+        SUM(CASE WHEN index = 7 THEN cnt ELSE 0 END) AS m7,
+        SUM(CASE WHEN index = 8 THEN cnt ELSE 0 END) AS m8,
+        SUM(CASE WHEN index = 9 THEN cnt ELSE 0 END) AS m9,
+        SUM(CASE WHEN index = 10 THEN cnt ELSE 0 END) AS m10,
+        SUM(CASE WHEN index = 11 THEN cnt ELSE 0 END) AS m11,
+        SUM(CASE WHEN index = 12 THEN cnt ELSE 0 END) AS m12,
+        SUM(CASE WHEN index = 13 THEN cnt ELSE 0 END) AS m13
+    FROM xxx
+    GROUP BY cohort_date
+    ORDER BY cohort_date
+)
+-- Retention cohort analysis
+SELECT
+    cohort_date,
+    (100 - ROUND(100.00 * m1 / m1, 2)) || '%' AS m1,
+    (100 - ROUND(100.00 * m2 / m1, 2)) || '%' AS m2,
+    (100 - ROUND(100.00 * m3 / m1, 2)) || '%' AS m3,
+    ROUND(100.00 * m4 / m1, 2) || '%' AS m4,
+    ROUND(100.00 * m5 / m1, 2) || '%' AS m5,
+    ROUND(100.00 * m6 / m1, 2) || '%' AS m6,
+    ROUND(100.00 * m7 / m1, 2) || '%' AS m7,
+    ROUND(100.00 * m8 / m1, 2) || '%' AS m8,
+    ROUND(100.00 * m9 / m1, 2) || '%' AS m9,
+    ROUND(100.00 * m10 / m1, 2) || '%' AS m10,
+    ROUND(100.00 * m11 / m1, 2) || '%' AS m11,
+    ROUND(100.00 * m12 / m1, 2) || '%' AS m12,
+    ROUND(100.00 * m13 / m1, 2) || '%' AS m13
+FROM customer_cohort;
 
 
 
