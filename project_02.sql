@@ -257,7 +257,7 @@ Xây dựng view gồm các cột:
     Profit_to_cost_ratio: tổng lợi nhuận / tổng chi phí
 */
 
-CREATE OR REPLACE VIEW `project02-427007.project02.vw_ecommerce_analyst` AS
+CREATE OR REPLACE VIEW project02-427007.project02.vw_ecommerce_analyst AS
 WITH orders_data AS (
     SELECT 
         FORMAT_TIMESTAMP('%Y-%m', o.created_at) AS month,
@@ -266,9 +266,9 @@ WITH orders_data AS (
         COUNT(o.order_id) AS order_count,
         SUM(i.sale_price) AS total_sales
     FROM 
-        `bigquery-public-data.thelook_ecommerce.orders` AS o
+        bigquery-public-data.thelook_ecommerce.orders AS o
     JOIN 
-        `bigquery-public-data.thelook_ecommerce.order_items` AS i 
+        bigquery-public-data.thelook_ecommerce.order_items AS i 
     ON 
         o.order_id = i.order_id
     WHERE 
@@ -282,7 +282,7 @@ product_data AS (
         p.category AS product_category,
         p.cost
     FROM 
-        `bigquery-public-data.thelook_ecommerce.products` AS p
+        bigquery-public-data.thelook_ecommerce.products AS p
 ),
 monthly_metrics AS (
     SELECT 
