@@ -336,66 +336,7 @@ ORDER BY
 ----------------------------------------------------------
 /*
 Insight
-1. Phân tích tăng trưởng doanh thu (Revenue Growth)
-Tháng 2/2019: Một số sản phẩm có mức tăng trưởng doanh thu cao
-Fashion Hoodies & Sweatsh: tăng trưởng doanh thu đạt 544.44%.
-Jeans: tăng trưởng doanh thu đạt 815.23%.
-Tops & Tees: tăng trưởng doanh thu đạt 1206.32%.
-
-Tháng 3/2019: Có một số sản phẩm có mức tăng trưởng doanh thu rất cao, chẳng hạn như:
-Dresses: tăng trưởng doanh thu đạt 4062% 
-Sweaters: tăng trưởng doanh thu đạt 3620%
-Maternity: tăng trưởng doanh thu đạt 653%
-
-2. Phân tích tăng trưởng đơn hàng (Order Growth)
-Một số sản phẩm có sự tăng trưởng đơn hàng ấn tượng, chẳng hạn như:
-Tháng 2/2019: 
-+ Jeans: 500%
-+ Tops & Tees: 500%
-Tháng 3/2019
-+ Sweaters: 800%
-
-3. Phân tích lợi nhuận (Total Profit)
-Tháng 1/2019: Một số sản phẩm có lợi nhuận cao nhất bao gồm:
-Sweaters: đạt lợi nhuận là 205.91.
-Shorts: đạt lợi nhuận là 83.88.
-Dresses: đạt lợi nhuận là 68.09.
-
-Tháng 2/2019: Một số sản phẩm có lợi nhuận cao nhất bao gồm:
-Plus: đạt lợi nhuận là 489.40.
-Jeans: đạt lợi nhuận là 389.46.
-Tops & Tees: đạt lợi nhuận là 127.60.
-
-Tháng 3/2019: Một số sản phẩm có lợi nhuận cao nhất bao gồm:
-Swim: 500.74
-Sweaters: 466
-Dresses: 466
-
-4. Tỷ lệ lợi nhuận trên chi phí (Profit to Cost Ratio)
-Tháng 1/2019: Một số sản phẩm có tỷ lệ lợi nhuận trên chi phí cao nhất bao gồm:
-Socks & Hosiery: 1.5
-Blazers & Jackets: 1.44
-Tháng 2/2019: 
-Suits & Sport Coats: 1.59
-Blazers & Jackets: 1.64
-Tháng 3/2019
-Suits & Sport Coats: 1.67
-Blazers & Jackets: 1.64
-
-5. Chi phí tổng (Total Cost)
-Tháng 1/2019: Một số sản phẩm có chi phí cao nhất bao gồm:
-Sweaters: chi phí là 212.17.
-Shorts: chi phí là 83.23.
-
-Tháng 2/2019: Một số sản phẩm có chi phí cao nhất bao gồm:
-Plus: chi phí là 429.59.
-Jeans: chi phí là 415.94.
-
-Tháng 3/2019: Một số sản phẩm có chi phí cao nhất bao gồm:
-Sweaters: 463.41
-Swim: 425.92
-
-6. Phân tích theo thời gian
+Phân tích theo thời gian
 Tăng trưởng theo tháng: Sự tăng trưởng doanh thu và số lượng đơn hàng giữa tháng 1, tháng 2 có sự biến động mạnh. Đặc biệt, một số sản phẩm như Jeans và Tops & Tees có sự gia tăng đáng kể.
 Từ tháng 2 đến tháng 2: các sản phẩm Swims có sự gia tăng mạnh mẽ
 */
